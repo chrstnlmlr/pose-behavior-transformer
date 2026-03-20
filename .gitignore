@@ -1,6 +1,6 @@
-local_data/
-data/
-outputs/
+/local_data/
+/data/
+/outputs/
 *.npy
 *.npz
 *.keras
@@ -9,3 +9,4 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 .env
+.venv
