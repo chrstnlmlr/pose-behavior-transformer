@@ -1,18 +1,29 @@
-# Function to load data
-def load_data(file_path):
-    try:
-        df = pd.read_csv(file_path, sep=';')
-        return df
-    except FileNotFoundError:
-        print(f"File not found at: {file_path}")
-        return None
+from pathlib import Path
+import pandas as pd
 
-# File path and data loading
-file_name = 'df_cleaned.csv'
-data = load_data(file_name)
 
-if data is not None:
-    print("Data loaded successfully.")
-    print(f"\nData Shape: {data.shape}")
-else:
-    print("Data loading failed.")
+def load_data(
+    file_path: str | Path,
+    sep: str = ";",
+    usecols=None,
+    dtype=None,
+) -> pd.DataFrame:
+    """
+    Load raw tabular pose data with optional column and dtype selection.
+    """
+    file_path = Path(file_path)
+
+    if not file_path.exists():
+        raise FileNotFoundError(f"File not found at: {file_path}")
+
+    df = pd.read_csv(
+        file_path,
+        sep=sep,
+        usecols=usecols,
+        dtype=dtype,
+    )
+
+    print(f"Data loaded successfully from: {file_path}")
+    print(f"Data shape: {df.shape}")
+    print(df.dtypes.head())
+    return df

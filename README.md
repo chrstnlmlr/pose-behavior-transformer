@@ -24,10 +24,10 @@ This repository implements a machine learning pipeline for temporal behavior rec
 
 ## Current benchmark
 
-| Model       | F1 flap | F1 jump |
-|-------------|---------|---------|
-| LSTM        | 0.68    | 0.12    |
-| Transformer | 0.71    | 0.18    |
+| Model       | F1 flap | Recall flap | F1 jump | Recall jump |
+|-------------|---------|-------------|---------|-------------|
+| LSTM        | 0.4692  | 0.3989      | 0.1985  | 0.1522      |
+| Transformer | 0.4727  | 0.4344      | 0.2065  | 0.1794      |
 
 ## Repository structure
 

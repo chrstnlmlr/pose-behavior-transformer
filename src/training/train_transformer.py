@@ -1,26 +1,20 @@
 from pathlib import Path
-
 import numpy as np
 
 from src.models.transformer_model import build_transformer_model
 from src.training.cross_validation import run_cross_validation
 
 
-def main():
-    """
-    Minimal training entry point.
+def load_sequence_data(npz_path: str | Path):
+    data = np.load(npz_path, allow_pickle=True)
+    return data["X_sequences"], data["y_sequences"], data["groups_sequences"]
 
-    Expected files:
-    - data/X_sequences.npy
-    - data/y_sequences.npy
-    - data/groups_sequences.npy
-    """
-    data_dir = Path("data")
+
+def main():
+    data_path = Path("data/sequence_data.npz")
     output_dir = Path("outputs/transformer")
 
-    X_sequences = np.load(data_dir / "X_sequences.npy")
-    y_sequences = np.load(data_dir / "y_sequences.npy")
-    groups_sequences = np.load(data_dir / "groups_sequences.npy", allow_pickle=True)
+    X_sequences, y_sequences, groups_sequences = load_sequence_data(data_path)
 
     model_params = {
         "d_model": 128,
