@@ -210,6 +210,18 @@ These results support the hypothesis that attention-based models can better capt
 
 ![Public benchmark recall comparison](reports/figures/public_model_comparison_recall.png)
 
+## Related work
+
+This repository builds upon previous work on semi-automated behavioral coding using pose-based features:
+
+Lemler et al. (2025). *Semi-Automated Multi-Label Classification of Autistic Mannerisms by Machine Learning on Post Hoc Skeletal Pose Data*. Autism Research.
+https://onlinelibrary.wiley.com/doi/10.1002/aur.70020
+
+The current project extends this line of work by:
+- introducing a modular benchmark structure
+- comparing sequence modeling architectures (LSTM vs Transformer)
+- validating findings on both private and public datasets
+
 ## Status
 
 This repository currently includes a private pose-based benchmark and a public video-based benchmark, and will be extended with additional datasets and model variants.
