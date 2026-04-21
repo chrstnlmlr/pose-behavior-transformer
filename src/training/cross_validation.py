@@ -20,7 +20,7 @@ def set_random_seed(random_seed: int = 0):
     random.seed(random_seed)
 
 
-def ensure_output_dir(output_dir: str | Path):
+def ensure_output_dir(output_dir):
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     return output_dir
@@ -35,21 +35,53 @@ def check_group_overlap(groups_train, groups_test):
 
 
 def print_label_distribution(y_data, groups_data, fold_type: str):
-    no_man = np.sum(np.all(y_data == [0, 0], axis=1))
-    jump = np.sum(np.all(y_data == [0, 1], axis=1))
-    flap = np.sum(np.all(y_data == [1, 0], axis=1))
-    flap_jump = np.sum(np.all(y_data == [1, 1], axis=1))
-    group_count = len(np.unique(groups_data))
+    """
+    Generic label distribution printer.
 
+    Works for:
+    - multi-label binary vectors, e.g. shape (N, 2)
+    - one-hot multi-class vectors, e.g. shape (N, K)
+    """
     print(f"\nLabel distribution in {fold_type}:")
-    print(
-        f"  no_man={no_man}, jump={jump}, flap={flap}, flap_jump={flap_jump}"
-    )
-    print(f"  total sequences={len(y_data)}, unique groups={group_count}")
+    print(f"  total sequences={len(y_data)}, unique groups={len(np.unique(groups_data))}")
+
+    if y_data.ndim != 2:
+        print("  Warning: y_data is expected to be 2D.")
+        return
+
+    label_counts = y_data.sum(axis=0)
+
+    for idx, count in enumerate(label_counts):
+        print(f"  label_{idx} positives={int(count)}")
 
 
-def combine_multilabel_for_stratification(y_sequences: np.ndarray):
-    return y_sequences[:, 0] * 2 + y_sequences[:, 1]
+def combine_labels_for_stratification(y_sequences: np.ndarray) -> np.ndarray:
+    """
+    Convert label matrix into a 1D stratification target.
+
+    Cases:
+    - binary multi-label with 2 columns: use bit-style encoding
+    - multiclass one-hot: use argmax
+    - fallback: stringify rows and factorize
+    """
+    if y_sequences.ndim != 2:
+        raise ValueError("y_sequences must be a 2D array")
+
+    n_labels = y_sequences.shape[1]
+
+    # Original ASD case: two binary outputs
+    if n_labels == 2 and np.array_equal(np.unique(y_sequences), np.array([0, 1])):
+        return y_sequences[:, 0] * 2 + y_sequences[:, 1]
+
+    # One-hot multiclass
+    row_sums = y_sequences.sum(axis=1)
+    if np.allclose(row_sums, 1.0):
+        return np.argmax(y_sequences, axis=1)
+
+    # Generic fallback
+    row_strings = ["_".join(map(str, row.astype(int))) for row in y_sequences]
+    encoded, _ = pd.factorize(row_strings)
+    return encoded
 
 
 def run_cross_validation(
@@ -58,9 +90,9 @@ def run_cross_validation(
     groups_sequences: np.ndarray,
     build_model_fn,
     model_params: dict,
-    output_dir: str | Path,
+    output_dir,
     model_name: str,
-    label_names=("flap", "jump"),
+    label_names=None,
     n_splits: int = 3,
     epochs: int = 100,
     batch_size: int = 16,
@@ -69,28 +101,14 @@ def run_cross_validation(
 ):
     """
     Runs subject-independent StratifiedGroupKFold CV for a model builder function.
-
-    Parameters
-    ----------
-    X_sequences : np.ndarray
-        Shape: (n_sequences, sequence_length, n_features)
-    y_sequences : np.ndarray
-        Shape: (n_sequences, n_labels)
-    groups_sequences : np.ndarray
-        Shape: (n_sequences,)
-    build_model_fn : callable
-        Function returning a compiled model. Must accept `input_shape`.
-    model_params : dict
-        Parameters forwarded to build_model_fn besides input_shape.
-    output_dir : str | Path
-        Directory for fold results.
-    model_name : str
-        Used for folder naming and logs.
     """
     set_random_seed(random_seed)
     output_dir = ensure_output_dir(output_dir)
 
-    combined_y = combine_multilabel_for_stratification(y_sequences)
+    if label_names is None:
+        label_names = [f"label_{i}" for i in range(y_sequences.shape[1])]
+
+    combined_y = combine_labels_for_stratification(y_sequences)
     cv = StratifiedGroupKFold(n_splits=n_splits)
 
     all_fold_metrics = []
