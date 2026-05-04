@@ -40,7 +40,15 @@ def compute_threshold_metrics(y_pred, y_true, label_index: int, label_name: str,
 
 
 def plot_threshold_curve(df, model_name: str, label_name: str, output_path: Path):
-    fig, ax = plt.subplots(figsize=(7, 4))
+    plt.rcParams.update({
+        "font.size": 10,
+        "axes.labelsize": 10,
+        "xtick.labelsize": 9,
+        "ytick.labelsize": 9,
+        "legend.fontsize": 9,
+    })
+
+    fig, ax = plt.subplots(figsize=(6.5, 3.6))
 
     ax.plot(df["threshold"], df["precision"], marker="o", label="Precision")
     ax.plot(df["threshold"], df["recall"], marker="o", label="Recall")
@@ -49,11 +57,12 @@ def plot_threshold_curve(df, model_name: str, label_name: str, output_path: Path
     ax.set_xlabel("Decision threshold")
     ax.set_ylabel("Score")
     ax.set_ylim(0, 1)
-    ax.set_title(f"{model_name.upper()} threshold analysis: {label_name}")
-    ax.legend()
+    ax.yaxis.grid(True, linestyle="--", linewidth=0.5, alpha=0.6)
+    ax.set_axisbelow(True)
+    ax.legend(frameon=True)
 
     plt.tight_layout()
-    fig.savefig(output_path, dpi=300)
+    fig.savefig(output_path, dpi=300, bbox_inches="tight")
     plt.close(fig)
 
 

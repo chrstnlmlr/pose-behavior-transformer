@@ -21,31 +21,40 @@ def load_cm(model_name, label):
     return np.array(matrices)
 
 
-def compute_mean_cm(cm_array):
-    return np.mean(cm_array, axis=0)
+def plot_cm(cm, save_path):
+    plt.rcParams.update({
+        "font.size": 10,
+        "axes.labelsize": 10,
+        "xtick.labelsize": 9,
+        "ytick.labelsize": 9,
+    })
 
+    fig, ax = plt.subplots(figsize=(3.2, 3.2))
 
-def plot_cm(cm, title, save_path):
-    fig, ax = plt.subplots(figsize=(4, 4))
+    im = ax.imshow(cm, cmap="Blues")
 
-    ax.imshow(cm)
-
-    ax.set_title(title)
     ax.set_xlabel("Predicted")
     ax.set_ylabel("True")
 
     ax.set_xticks([0, 1])
     ax.set_yticks([0, 1])
-
     ax.set_xticklabels(["No", "Yes"])
     ax.set_yticklabels(["No", "Yes"])
 
+    # cell borders
+    ax.set_xticks(np.arange(-0.5, 2, 1), minor=True)
+    ax.set_yticks(np.arange(-0.5, 2, 1), minor=True)
+    ax.grid(which="minor", color="white", linestyle="-", linewidth=1.5)
+    ax.tick_params(which="minor", bottom=False, left=False)
+
+    threshold = cm.max() / 2
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
-            ax.text(j, i, f"{cm[i, j]:.1f}", ha="center", va="center")
+            color = "white" if cm[i, j] > threshold else "black"
+            ax.text(j, i, f"{cm[i, j]:.1f}", ha="center", va="center", color=color)
 
     plt.tight_layout()
-    plt.savefig(save_path, dpi=300)
+    plt.savefig(save_path, dpi=300, bbox_inches="tight")
     plt.close()
 
 
@@ -53,18 +62,15 @@ def main():
     reports_dir = Path("reports")
     reports_dir.mkdir(exist_ok=True)
 
-    for label in ["flap", "jump"]:
-        for model in ["lstm", "transformer"]:
-            cm_array = load_cm(model, label)
-            cm_mean = compute_mean_cm(cm_array)
+    cm_array = load_cm("transformer", "jump")
+    cm_mean = np.mean(cm_array, axis=0)
 
-            plot_cm(
-                cm_mean,
-                f"{model.upper()} - {label}",
-                reports_dir / f"figure_cm_{label}_{model}.png"
-            )
+    plot_cm(
+        cm_mean,
+        reports_dir / "figure_cm_jump_transformer.png"
+    )
 
-    print("Saved all confusion matrices to reports/")
+    print("Saved confusion matrix to reports/")
 
 
 if __name__ == "__main__":

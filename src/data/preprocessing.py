@@ -1,7 +1,6 @@
 from pathlib import Path
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
 
 
 DEFAULT_SEQUENCE_LENGTH = 15
@@ -198,11 +197,11 @@ def prepare_sequence_data(
     )
     print_label_distribution(y, groups, sequence_length, "row-level data")
 
-    X_scaled, scaler = standardize_features(X)
+    scaler = None
 
     if apply_undersampling:
         X_processed, y_processed, groups_processed = undersample_sequences(
-            X=X_scaled,
+            X=X,
             y=y,
             groups=groups,
             sequence_length=sequence_length,
@@ -219,7 +218,7 @@ def prepare_sequence_data(
             "undersampled row-level data",
         )
     else:
-        X_processed, y_processed, groups_processed = X_scaled, y, groups
+        X_processed, y_processed, groups_processed = X, y, groups
 
     X_sequences, y_sequences, groups_sequences = make_sequence_arrays(
         X=X_processed,
