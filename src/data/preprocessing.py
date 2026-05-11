@@ -147,7 +147,7 @@ def save_sequence_arrays(
     compressed: bool = False,
 ):
     """
-    Save sequence arrays locally. Do not commit these to GitHub.
+    Save sequence arrays for downstream training and evaluation.
     """
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
