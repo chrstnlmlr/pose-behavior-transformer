@@ -1,5 +1,6 @@
 /local_data/
-/data/
+/data/*
+!/data/sequence_data.npz
 /outputs/
 /reports/tmp/
 

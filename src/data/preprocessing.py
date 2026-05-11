@@ -61,13 +61,6 @@ def extract_arrays(
 
     return X, y, groups
 
-
-def standardize_features(X: np.ndarray):
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-    return X_scaled, scaler
-
-
 def undersample_sequences(
     X: np.ndarray,
     y: np.ndarray,
